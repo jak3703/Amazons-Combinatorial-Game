@@ -135,6 +135,8 @@
                         err = shootBlack(row, col)
                         if (err) {
                             messager.innerHTML = 'Invalid Move!'
+                        } else if (getState() === 'bw') {
+                            messager.innerHTML = 'Black Wins! Refresh page to start a new game!'
                         } else {
                             messager.innerHTML = 'White, your move.'
                         }
@@ -143,9 +145,17 @@
                         err = shootWhite(row, col)
                         if (err) {
                             messager.innerHTML = 'Invalid Move!'
+                        } else if (getState() === 'ww') {
+                            messager.innerHTML = 'White Wins! Refresh page to start a new game!'
                         } else {
                             messager.innerHTML = 'Black, your move.'
                         }
+                        break
+                    case 'ww':
+                        messager.innerHTML = 'White Wins! Refresh page to start a new game!'
+                        break
+                    case 'bw':
+                        messager.innerHTML = 'Black Wins! Refresh page to start a new game!'
                         break
                     default:
                         console.log('Click Handler:')

@@ -1,4 +1,3 @@
-
 // # '' = empty
 // # 'b' = black piece
 // # 'w' = white piece
@@ -6,7 +5,7 @@
 const grid = []
 
 // # b = black, w = white
-// # p = select initial position, m = moving piece, s = piece is shooting
+// # p = select initial position, m = moving piece, s = piece is shooting, w = won
 let state = ''
 let whitePos = []
 let blackPos = []
@@ -174,6 +173,7 @@ function shootBlack(r, c) {
         }
         grid[r][c] = 'x'
         state = 'wm'
+        checkBlackWinner()
         return false
     } 
     // moving up or down
@@ -186,12 +186,14 @@ function shootBlack(r, c) {
         }
         grid[r][c] = 'x'
         state = 'wm'
+        checkBlackWinner()
         return false
     }
     // moving diagonal
     else if (checkSpaceIsDiagonal(blackPos[0], blackPos[1], r, c)) {
         grid[r][c] = 'x'
         state = 'wm'
+        checkBlackWinner()
         return false
     }
     return true
@@ -211,6 +213,7 @@ function shootWhite(r, c) {
         }
         grid[r][c] = 'x'
         state = 'bm'
+        checkWhiteWinner()
         return false
     } 
     // moving up or down
@@ -223,13 +226,51 @@ function shootWhite(r, c) {
         }
         grid[r][c] = 'x'
         state = 'bm'
+        checkWhiteWinner()
         return false
     }
     // moving diagonal
     else if (checkSpaceIsDiagonal(whitePos[0], whitePos[1], r, c)) {
         grid[r][c] = 'x'
         state = 'bm'
+        checkWhiteWinner()
         return false
     }
     return true
+}
+
+function checkBlackWinner() {
+    const maxRow = grid.length
+    const maxCol = grid[0].length
+    for (let deltaR = -1; deltaR <= 1; deltaR++) {
+        for (let deltaC = -1; deltaC <= 1; deltaC++) {
+            let curRow = whitePos[0] + deltaR
+            let curCol = whitePos[1] + deltaC
+            if (!(0 <= curRow && curRow < maxRow && 0 <= curCol && curCol < maxCol)) {
+                continue
+            }
+            if (grid[curRow][curCol] === '') {
+                return
+            }
+        }
+    }
+    state = 'bw'
+}
+
+function checkWhiteWinner() {
+    const maxRow = grid.length
+    const maxCol = grid[0].length
+    for (let deltaR = -1; deltaR <= 1; deltaR++) {
+        for (let deltaC = -1; deltaC <= 1; deltaC++) {
+            let curRow = blackPos[0] + deltaR
+            let curCol = blackPos[1] + deltaC
+            if (!(0 <= curRow && curRow < maxRow && 0 <= curCol && curCol < maxCol)) {
+                continue
+            }
+            if (grid[curRow][curCol] === '') {
+                return
+            }
+        }
+    }
+    state = 'ww'
 }
