@@ -1,0 +1,185 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Amazons Game</title>
+        <script src="amazons.js"></script>
+        <style>
+            .display-wrapper {
+                width: 100vw;
+                height: 100vh;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+            }
+            .centered {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .size-selector {
+                display: flex;
+            }
+            .size-selector * {
+                margin-left: 5%;
+                margin-right: 5%
+            }
+            #numRows, #numCols {
+                height: 5%;
+                width: 10%;
+            }
+            iframe {
+                display: none;
+            }
+            .square {
+                position: relative;
+            }
+            img {
+                width: 75%;
+                height: 75%;
+                position: absolute;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                top: 50%;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="display-wrapper">
+            <p class="centered">Welcome to Amazons! <a href="https://en.wikipedia.org/wiki/Game_of_the_Amazons">Rules</a> (note: black goes first in this version)</p>
+            <p style="top: 5%; text-decoration: underline;" class="centered">Select board dimensions: </p>
+            <div style="top: 10%" class="size-selector centered">
+                <label for="numRows">Rows: </label>
+                <input id="numRows" name="numRows" label="Rows"/>
+                <label for="numCols">Columns: </label>
+                <input id="numCols" name="numCols" label="Cols"/>
+            </div>
+            <button style="top: 20%" class="centered" onclick="initialize()">Continue</button>
+        </div>
+        <script>
+            const GRIDBODY = `
+                 <div style="width: 100vw; display: flex; flex-direction: column; align-items: center;">
+                     <p id="messager">Choose the start position for black!</p>
+                     <div style="width: {0}vw;">
+                         <div style="display: grid; grid-template-columns:{1};">
+                             {2}
+                         </div>
+                     </div>
+                 </div>
+                `
+            const whitePc = `<img src="./assets/white.svg"/>`
+            const blackPc = `<img src="./assets/black.svg"/>`
+            const destroyed = `<img src="./assets/destroyed.svg"/>`
+            String.prototype.format = function () {
+                var a = this;
+                for (var k in arguments) {
+                    a = a.replace(new RegExp("\\{" + k + "\\}", 'g'), arguments[k]);
+                }
+                return a
+            }
+            function initialize() {
+                const rows = Math.floor(Number(document.querySelector('#numRows').value))
+                const cols = Math.floor(Number(document.querySelector('#numCols').value))
+                initGame(rows, cols)
+                let autos = ''
+                for (let i = 0; i < cols; i++) {
+                    autos += ' auto'
+                }
+                const numSquares = rows * cols
+                let squaresStr = ''
+                for (let i = 0; i < numSquares; i++) {
+                    const row = Math.floor(i / cols)
+                    const col = i % cols
+                    squaresStr += `<div class="square" id="${row}_${col}" onclick="handleSquareClick(event)" style="height: 3vw; border: 1px solid black;"></div>\n`
+                }
+                const newBody = GRIDBODY.format(3 * cols, autos, squaresStr)
+                document.querySelector('body').innerHTML = newBody
+            }
+
+            function handleSquareClick(e) {
+                messager = document.querySelector('#messager')
+                const squareId = e.target.id
+                const row = Number(squareId.split('_')[0])
+                const col = Number(squareId.split('_')[1])
+                const curState = getState()
+                let err = false
+                switch(curState) {
+                    case 'bp':
+                        initBlack(row, col)
+                        messager.innerHTML = 'Choose the start position for white!'
+                        break
+                    case 'wp':
+                        err = initWhite(row, col)
+                        if (err) {
+                            messager.innerHTML = 'Invalid Move!'
+                        } else {
+                            messager.innerHTML = 'Black, your move.'
+                        }
+                        break
+                    case 'bm':
+                        err = moveBlack(row, col)
+                        if (err) {
+                            messager.innerHTML = 'Invalid Move!'
+                        } else {
+                            messager.innerHTML = 'Black, take your shot!'
+                        }
+                        break
+                    case 'wm':
+                        err = moveWhite(row, col)
+                        if (err) {
+                            messager.innerHTML = 'Invalid Move!'
+                        } else {
+                            messager.innerHTML = 'White, take your shot!'
+                        }
+                        break
+                    case 'bs':
+                        err = shootBlack(row, col)
+                        if (err) {
+                            messager.innerHTML = 'Invalid Move!'
+                        } else {
+                            messager.innerHTML = 'White, your move.'
+                        }
+                        break
+                    case 'ws':
+                        err = shootWhite(row, col)
+                        if (err) {
+                            messager.innerHTML = 'Invalid Move!'
+                        } else {
+                            messager.innerHTML = 'Black, your move.'
+                        }
+                        break
+                    default:
+                        console.log('Click Handler:')
+                        console.log('We got a major problem if we\'re here')
+                }
+                updateGridView()
+            }
+
+            function updateGridView() {
+                const grid = getGrid()
+                for (let r = 0; r < grid.length; r++) {
+                    for (let c = 0; c < grid[r].length; c++) {
+                        const val = grid[r][c]
+                        const square = document.getElementById(`${r}_${c}`)
+                        switch (val) {
+                            case '':
+                                square.innerHTML = ''
+                                break
+                            case 'w':
+                                square.innerHTML = whitePc
+                                break
+                            case 'b':
+                                square.innerHTML = blackPc
+                                break
+                            case 'x':
+                                square.innerHTML = destroyed
+                                break
+                            default:
+                                console.log('Updating:')
+                                console.log('We got a major problem if we\'re here')
+                        }
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>
